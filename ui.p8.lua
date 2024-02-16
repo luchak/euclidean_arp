@@ -4,8 +4,11 @@ function ui_init()
  mouse={
   x=0,
   y=0,
-  b=0
+  b=0,
+  dy=0
  }
+
+ mouse_locked=false
 
  -- enable mouse
  poke(0x5f2d,1)
@@ -20,11 +23,14 @@ function ui_draw()
 end
 
 function ui_update()
+ local mx,my=stat(32),stat(33)
  last_mouse=mouse
  mouse={
-  x=mid(stat(32),127),
-  y=mid(stat(33),127),
+  x=mid(mx,127),
+  y=mid(my,127),
   b=stat(34),
+  -- dy is in host pixels i believe
+  dy=stat(39) or 4*(my-last_mouse.y),
   frames=last_mouse.frames and min(last_mouse.frames+1,0x7fff),
   tgt=last_mouse.tgt,
  }
@@ -54,7 +60,18 @@ function ui_add(widget)
  add(widgets, widget)
 end
 
+function ui_lock_mouse()
+ poke(0x5f2d,5)
+ mouse_locked=true
+end
+
+function ui_unlock_mouse()
+ poke(0x5f2d,1)
+ mouse_locked=false
+end
+
 function widget_new(x,y,w,h,draw,handlers)
+ handlers=handlers or {}
  local widget={
   x=x,
   y=y,
@@ -73,6 +90,15 @@ function widget_new(x,y,w,h,draw,handlers)
  return widget
 end
 
+function label_new(x,y,col,text)
+ return widget_new(
+  x,y,#text*4,8,
+  function()
+   print(text,x,y+1,col)
+  end
+ )
+end
+
 function toggle_new(x,y,spr_off,spr_on,get,set)
  return widget_new(x,y,8,8,
   function()
@@ -86,18 +112,27 @@ function toggle_new(x,y,spr_off,spr_on,get,set)
  )
 end
 
-function num_spinner_new(x,y,col,min_val,max_val,sens,get,set)
- return widget_new(x,y,8,8,
+function num_spinner_new(x,y,col,digits,min_val,max_val,sens,step,get,set)
+ local drag_val
+ return widget_new(x,y,digits*4,8,
   function()
-   print(get(),x,y,col)
+   local s=tostr(get())
+   print(s,x+4*max(digits-#s),y+1,col)
+   --print(get())
   end,
   {
-   drag_start=function()
+   mouse_down=function()
+    ui_lock_mouse()
+    drag_val=get()
    end,
-   drag=function()
-    set(not get())
+   mouse_move=function()
+    if mouse.dy != 0 then
+     drag_val=mid(min_val,max_val,drag_val-mouse.dy*sens)
+     set(drag_val\step*step)
+    end
    end,
-   drag_end=function()
+   mouse_up=function()
+    ui_unlock_mouse()
    end,
   }
  )
