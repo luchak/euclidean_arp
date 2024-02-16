@@ -23,14 +23,14 @@ function ui_draw()
 end
 
 function ui_update()
- local mx,my=stat(32),stat(33)
+ local mx,my,mdy=stat(32),stat(33),stat(39)
  last_mouse=mouse
  mouse={
   x=mid(mx,127),
   y=mid(my,127),
   b=stat(34),
   -- dy is in host pixels i believe
-  dy=stat(39) or 4*(my-last_mouse.y),
+  dy=mdy!=0 and mdy or 4*(my-last_mouse.y),
   frames=last_mouse.frames and min(last_mouse.frames+1,0x7fff),
   tgt=last_mouse.tgt,
  }
