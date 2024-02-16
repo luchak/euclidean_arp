@@ -29,6 +29,18 @@ function _init()
   function(x) seq:set_tempo(x) end
  ))
  ui_add(label_new(30,0,6,'bpm'))
+
+ ui_add(num_spinner_new(
+  0,32,15,4,0,15,0.1,1,
+  function() return seq.euclid_shift end,
+  function(x) seq.euclid_shift=x seq:euclid_gen() end
+ ))
+
+ ui_add(num_spinner_new(
+  16,32,15,4,0,16,0.1,1,
+  function() return seq.euclid_pulses end,
+  function(x) seq.euclid_pulses=x seq:euclid_gen() end
+ ))
 end
 
 function _update60()

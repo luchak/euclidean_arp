@@ -8,7 +8,10 @@ function seq_new(length)
   step_len=700,
   step=0,
   bpm=120,
-  scale={0,1,3,5,7,8,10,12}
+  scale={0,1,3,5,7,8,10,12},
+
+  euclid_shift=0,
+  euclid_pulses=0
  }
 
  for i=0,length-1 do
@@ -43,6 +46,25 @@ function seq_new(length)
   local todo=min(self.step_len-self.step_pos,length)
   self.step_pos+=todo
   return todo,trig,self.gate[self.step],self.scale[1+self.note[self.step]]
+ end
+
+ function seq:euclid_gen()
+  for i=0,self.length-1 do
+   self.gate[i]=false
+  end
+
+  if (self.euclid_pulses==0) return
+
+  log('begin')
+  local i=0
+  for x=0,self.length-1,self.length/self.euclid_pulses do
+   local idx=(x+.5)\1
+   log(idx)
+   idx=(idx+self.euclid_shift)%self.length
+   self.gate[idx]=true
+   self.note[idx]=i
+   i+=1
+  end
  end
 
  seq:set_tempo(120)

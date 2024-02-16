@@ -126,10 +126,9 @@ function num_spinner_new(x,y,col,digits,min_val,max_val,sens,step,get,set)
     drag_val=get()
    end,
    mouse_move=function()
-    if mouse.dy != 0 then
-     drag_val=mid(min_val,max_val,drag_val-mouse.dy*sens)
-     set(drag_val\step*step)
-    end
+    drag_val=mid(min_val,max_val,drag_val-mouse.dy*sens)
+    local new_val=drag_val\step*step
+    if(new_val!=get()) set(new_val)
    end,
    mouse_up=function()
     ui_unlock_mouse()
