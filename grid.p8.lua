@@ -1,4 +1,5 @@
 LONG_PRESS_FRAMES=30
+BLACK_KEYS=set({1,3,6,8,10})
 
 -- grid position is fixed
 function grid_new(get_color, press)
@@ -39,6 +40,29 @@ function note_grid_new()
     seq.note[col]=row
     seq.gate[col]=true
    end
+  end
+ )
+end
+
+function euclid_mask_grid_new()
+ local function mask_to_grid(x)
+  return x%12,x\12*16+3
+ end
+
+ local function grid_to_mask(col,row)
+  return (row-3)*12+col
+ end
+
+ return grid_new(
+  function(col,row)
+    if (col>=12) return 4
+    local c=BLACK_KEYS[col] and 0 or 1
+    if (row==3) c+=5
+    if (seq.euclid_note_set[grid_to_mask(col,row)]) c=13
+    return c
+  end,
+  function(col,row,is_long)
+   if (col<12) seq:toggle_euclid_mask_note(grid_to_mask(col,row))
   end
  )
 end

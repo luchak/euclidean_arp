@@ -57,7 +57,25 @@ function ui_update()
 end
 
 function ui_add(widget)
- add(widgets, widget)
+ log('add?')
+ if not widget._shown then
+  log('add')
+  log(#widgets)
+  add(widgets,widget)
+  log(#widgets)
+  widget._shown=true
+ end
+end
+
+function ui_remove(widget)
+ log('rem?')
+ if widget._shown then
+  log('rem')
+  log(#widgets)
+  assert(del(widgets,widget))
+  log(#widgets)
+  widget._shown=false
+ end
 end
 
 function ui_lock_mouse()
@@ -81,6 +99,7 @@ function widget_new(x,y,w,h,draw,handlers)
   mouse_up=handlers.mouse_up or never,
   mouse_down=handlers.mouse_down or never,
   mouse_move=handlers.mouse_move or never,
+  _shown=false
  }
 
  function widget:hit(x,y)
@@ -103,6 +122,24 @@ function toggle_new(x,y,spr_off,spr_on,get,set)
  return widget_new(x,y,8,8,
   function()
    spr(get() and spr_on or spr_off,x,y)
+  end,
+  {
+   mouse_down=function()
+    set(not get())
+   end
+  }
+ )
+end
+
+function text_toggle_new(x,y,col_off,text_off,col_on,text_on,get,set)
+ local chars=max(#text_off,#text_on)
+ return widget_new(x,y,chars*4,8,
+  function()
+   if get() then
+    print(text_on,x+4*(chars-#text_on),y+1,col_on)
+   else
+    print(text_off,x+4*(chars-#text_off),y+1,col_off)
+   end
   end,
   {
    mouse_down=function()

@@ -1,3 +1,15 @@
+function arp_up_new(notes)
+ notes=copy(notes)
+ sort(notes)
+
+ local i=1
+ return function()
+  local out=notes[i]
+  i=(i%#notes)+1
+  return out
+ end
+end
+
 function seq_new(length)
  local seq={
   length=length,
@@ -8,10 +20,12 @@ function seq_new(length)
   step_len=700,
   step=0,
   bpm=120,
-  scale={0,1,3,5,7,8,10,12},
 
   euclid_shift=0,
-  euclid_pulses=0
+  euclid_pulses=0,
+
+  euclid_notes={0,4,7,10},
+  euclid_note_set=set({0,4,7,10})
  }
 
  for i=0,length-1 do
@@ -34,7 +48,7 @@ function seq_new(length)
 
  function seq:run(length)
   if not self.playing then
-   return length,false,false,self.scale[1+self.note[self.step]]
+   return length,false,false,self.note[self.step]
   end
 
   if self.step_pos>=self.step_len then
@@ -45,7 +59,7 @@ function seq_new(length)
   local trig=(self.step_pos==0) and gate
   local todo=min(self.step_len-self.step_pos,length)
   self.step_pos+=todo
-  return todo,trig,self.gate[self.step],self.scale[1+self.note[self.step]]
+  return todo,trig,self.gate[self.step],self.note[self.step]
  end
 
  function seq:euclid_gen()
@@ -54,17 +68,24 @@ function seq_new(length)
   end
 
   if (self.euclid_pulses==0) return
+  if (#self.euclid_notes==0) return
 
-  log('begin')
-  local i=0
+  local arp=arp_up_new(self.euclid_notes)
   for x=0,self.length-1,self.length/self.euclid_pulses do
-   local idx=(x+.5)\1
-   log(idx)
-   idx=(idx+self.euclid_shift)%self.length
+   local idx=((x+.5)\1+self.euclid_shift)%self.length
    self.gate[idx]=true
-   self.note[idx]=i
-   i+=1
+   self.note[idx]=arp()
   end
+ end
+
+ function seq:toggle_euclid_mask_note(note)
+  if self.euclid_note_set[note] then
+   del(self.euclid_notes,note)
+  else
+   add(self.euclid_notes,note)
+  end
+  self.euclid_note_set=set(self.euclid_notes)
+  self:euclid_gen()
  end
 
  seq:set_tempo(120)

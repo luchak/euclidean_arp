@@ -16,12 +16,26 @@ function _init()
  seq=seq_new(16)
  synth=synth_new()
 
+ local show_euclid_mask=false
+ local note_grid=note_grid_new()
+ local euclid_mask_grid=euclid_mask_grid_new()
+ local function set_show_euclid_mask(show)
+  show_euclid_mask=show
+  if show_euclid_mask then
+   ui_add(euclid_mask_grid)
+   ui_remove(note_grid)
+  else
+   ui_add(note_grid)
+   ui_remove(euclid_mask_grid)
+  end
+ end
+ set_show_euclid_mask(false)
+
  ui_add(toggle_new(
   0,0,2,3,
   function() return seq.playing end,
   function(x) seq:set_playing(x) end
  ))
- ui_add(note_grid_new())
 
  ui_add(num_spinner_new(
   16,0,15,3,60,200,0.2,1,
@@ -30,16 +44,33 @@ function _init()
  ))
  ui_add(label_new(30,0,6,'bpm'))
 
+ ui_add(label_new(0,8,5,'menu 1: euclid'))
+ ui_add(label_new(4,16,6,'len'))
+ ui_add(label_new(20,16,6,'puls'))
+ ui_add(label_new(44,16,6,'rot'))
+ ui_add(label_new(64,16,6,'inv'))
  ui_add(num_spinner_new(
-  0,32,15,4,0,15,0.1,1,
+  20,24,15,4,0,16,0.1,1,
+  function() return seq.euclid_pulses end,
+  function(x) seq.euclid_pulses=x seq:euclid_gen() end
+ ))
+ ui_add(num_spinner_new(
+  40,24,15,4,-15,15,0.1,1,
   function() return seq.euclid_shift end,
   function(x) seq.euclid_shift=x seq:euclid_gen() end
  ))
 
- ui_add(num_spinner_new(
-  16,32,15,4,0,16,0.1,1,
-  function() return seq.euclid_pulses end,
-  function(x) seq.euclid_pulses=x seq:euclid_gen() end
+ ui_add(label_new(0,32,5,'menu 2: arp / delay / tbd'))
+
+ ui_add(text_toggle_new(
+  0,56,5,'note',12,'note',
+  function() return not show_euclid_mask end,
+  function(x) set_show_euclid_mask(not x) end
+ ))
+ ui_add(text_toggle_new(
+  20,56,5,'mask',9,'mask',
+  function() return show_euclid_mask end,
+  set_show_euclid_mask
  ))
 end
 
