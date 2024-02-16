@@ -11,6 +11,9 @@ __lua__
 #include seq.p8.lua
 
 function _init()
+ -- no output lpf
+ poke(0x5f36,@0x5f36^^0x20)
+
  ui_init()
 
  seq=seq_new(16)
