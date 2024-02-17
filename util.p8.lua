@@ -30,6 +30,15 @@ function copy(a)
  return out
 end
 
+function copy0(a)
+ local out={}
+ local i=0
+ while a[i] do
+  out[i]=a[i]
+ end
+ return out
+end
+
 function sort(a)
  for i=1,#a do
   for j=i+1,#a do
