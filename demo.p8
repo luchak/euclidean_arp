@@ -90,7 +90,7 @@ function _init()
   function(x) seq.euclid_arp=x seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
-  20,48,15,4,0,3,0.1,1,
+  20,48,15,4,0,8,0.1,1,
   function() return seq.euclid_note_reps end,
   function(x) seq.euclid_note_reps=x seq:euclid_gen() end
  ))
