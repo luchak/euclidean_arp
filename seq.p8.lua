@@ -98,6 +98,8 @@ function seq_new(length)
   euclid_len=16,
   euclid_inv=0,
   euclid_arp=1,
+  euclid_note_reps=0,
+  euclid_rep_del=1,
 
   euclid_notes={0,4,7,10},
   euclid_note_set=set({0,4,7,10})
@@ -150,18 +152,33 @@ function seq_new(length)
 
   self.loop=self.euclid_len
 
+  -- place pulses and shift
   if self.euclid_pulses > 0 then
    for x=0,self.loop-1,self.loop/self.euclid_pulses do
-    local idx=((x+.5)\1+self.euclid_shift)%self.loop
-    self.gate[idx]=true
+    local idx=((x+.5)\1+self.euclid_shift)
+    self.gate[idx%self.loop]=true
    end
   end
 
-  local arp=arps[self.euclid_arp](self.euclid_notes)
+  -- invert pulses
   for i=0,self.loop-1 do
    if (self.euclid_inv>0) self.gate[i]=not self.gate[i]
+  end
 
-   if (self.gate[i]) self.note[i]=arp()
+  -- assign arp notes and add repeats
+  local arp=arps[self.euclid_arp](self.euclid_notes)
+  local last_gate,arp_note
+  for i=0,self.loop-1 do
+   if self.gate[i] then
+    last_gate=i
+    arp_note=arp()
+    self.note[i]=arp_note
+   else
+    if last_gate and (i-last_gate)%self.euclid_rep_del==0 and i-last_gate<=self.euclid_note_reps*self.euclid_rep_del then
+     self.gate[i]=true
+     self.note[i]=arp_note
+    end
+   end
   end
  end
 
