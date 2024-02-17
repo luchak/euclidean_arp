@@ -10,6 +10,9 @@ function ui_init()
 
  mouse_locked=false
 
+ -- assorted state that should go elsewhere probably
+ grid_page=0
+
  -- enable mouse
  poke(0x5f2d,1)
 end
@@ -131,20 +134,29 @@ function toggle_new(x,y,spr_off,spr_on,get,set)
  )
 end
 
-function text_toggle_new(x,y,col_off,text_off,col_on,text_on,get,set)
+function momentary_new(x,y,spr_off,spr_on,is_on,click)
+ return widget_new(x,y,8,8,
+  function()
+   spr(is_on() and spr_on or spr_off,x,y)
+  end,
+  {
+   mouse_down=click
+  }
+ )
+end
+
+function text_momentary_new(x,y,col_off,text_off,col_on,text_on,is_on,click)
  local chars=max(#text_off,#text_on)
  return widget_new(x,y,chars*4,8,
   function()
-   if get() then
+   if is_on() then
     print(text_on,x+4*(chars-#text_on),y+1,col_on)
    else
     print(text_off,x+4*(chars-#text_off),y+1,col_off)
    end
   end,
   {
-   mouse_down=function()
-    set(not get())
-   end
+   mouse_down=click
   }
  )
 end

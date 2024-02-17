@@ -27,13 +27,15 @@ function grid_new(get_color, press)
 end
 
 function note_grid_new()
- return grid_new(
+ local note_grid=grid_new(
   function(col,row)
+    col+=grid_page*16
     if (seq.playing and seq.step==col) return 14
     if (seq.gate[col] and (seq.note[col]==row)) return 8
     return 4
   end,
   function(col,row,is_long)
+   col+=grid_page*16
    if seq.gate[col] and seq.note[col]==row then
     seq.gate[col]=false
    else
@@ -42,6 +44,7 @@ function note_grid_new()
    end
   end
  )
+ return note_grid
 end
 
 function euclid_mask_grid_new()

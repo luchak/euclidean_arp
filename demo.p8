@@ -16,7 +16,7 @@ function _init()
 
  ui_init()
 
- seq=seq_new(16)
+ seq=seq_new(64)
  synth=synth_new()
 
  local show_euclid_mask=false
@@ -40,12 +40,19 @@ function _init()
   function(x) seq:set_playing(x) end
  ))
 
+ ui_add(label_new(16,0,6,'bpm'))
  ui_add(num_spinner_new(
-  16,0,15,3,60,200,0.2,1,
+  32,0,15,3,60,200,0.2,1,
   function() return seq.bpm end,
   function(x) seq:set_tempo(x) end
  ))
- ui_add(label_new(30,0,6,'bpm'))
+
+ ui_add(label_new(48,0,6,'loop'))
+ ui_add(num_spinner_new(
+  68,0,15,2,1,64,0.1,1,
+  function() return seq.loop end,
+  function(x) seq:set_loop(x) end
+ ))
 
  ui_add(label_new(0,8,5,'menu 1: euclid'))
  ui_add(label_new(4,16,6,'len'))
@@ -53,27 +60,66 @@ function _init()
  ui_add(label_new(44,16,6,'rot'))
  ui_add(label_new(64,16,6,'inv'))
  ui_add(num_spinner_new(
-  20,24,15,4,0,16,0.1,1,
+  0,24,15,4,1,64,0.1,1,
+  function() return seq.euclid_len end,
+  function(x) seq.euclid_len=x seq.euclid_pulses=min(x,seq.euclid_pulses) seq:euclid_gen() end
+ ))
+ ui_add(num_spinner_new(
+  20,24,15,4,0,64,0.1,1,
   function() return seq.euclid_pulses end,
-  function(x) seq.euclid_pulses=x seq:euclid_gen() end
+  function(x) seq.euclid_pulses=min(x,seq.euclid_len) seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
   40,24,15,4,-15,15,0.1,1,
   function() return seq.euclid_shift end,
   function(x) seq.euclid_shift=x seq:euclid_gen() end
  ))
+ ui_add(num_spinner_new(
+  60,24,15,4,0,1,0.1,1,
+  function() return seq.euclid_inv end,
+  function(x) seq.euclid_inv=x seq:euclid_gen() end
+ ))
 
  ui_add(label_new(0,32,5,'menu 2: arp / delay / tbd'))
+ ui_add(label_new(4,40,6,'arp'))
+ ui_add(num_spinner_new(
+  0,48,15,4,1,#arps,0.1,1,
+  function() return seq.euclid_arp end,
+  function(x) seq.euclid_arp=x seq:euclid_gen() end
+ ))
 
- ui_add(text_toggle_new(
+ ui_add(text_momentary_new(
   0,56,5,'note',12,'note',
   function() return not show_euclid_mask end,
-  function(x) set_show_euclid_mask(not x) end
+  function() set_show_euclid_mask(false) end
  ))
- ui_add(text_toggle_new(
+ ui_add(text_momentary_new(
   20,56,5,'mask',9,'mask',
   function() return show_euclid_mask end,
-  set_show_euclid_mask
+  function() set_show_euclid_mask(true) end
+ ))
+
+
+ ui_add(label_new(80,56,6,'page'))
+ ui_add(text_momentary_new(
+  100,56,5,'1',14,'1',
+  function() return grid_page==0 end,
+  function() grid_page=0 end
+ ))
+ ui_add(text_momentary_new(
+  108,56,5,'2',14,'2',
+  function() return grid_page==1 end,
+  function() grid_page=1 end
+ ))
+ ui_add(text_momentary_new(
+  116,56,5,'3',14,'3',
+  function() return grid_page==2 end,
+  function() grid_page=2 end
+ ))
+ ui_add(text_momentary_new(
+  124,56,5,'4',14,'4',
+  function() return grid_page==3 end,
+  function() grid_page=3 end
  ))
 end
 
