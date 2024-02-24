@@ -80,6 +80,20 @@ arps={
  arp_thumb_new,
  arp_pinky_new,
 }
+arp_names={
+ 'up',
+ 'down',
+ 'updn',
+ 'thmb',
+ 'pnky'
+}
+
+rep_type_names={
+ 'n=r|',
+ 'n=r>',
+ 'n>r|',
+ 'n>r>'
+}
 
 function seq_new(length)
  local seq={
@@ -97,9 +111,15 @@ function seq_new(length)
   euclid_pulses=0,
   euclid_len=16,
   euclid_inv=0,
+  -- see arps array for index meanings
   euclid_arp=1,
   euclid_note_reps=0,
   euclid_rep_del=1,
+  -- 1: repeats keep note, repeats cut off
+  -- 2: repeats keep note, repeats do not cut off
+  -- 3: repeats change note, repeats cut off
+  -- 4: repeats change note, repeats do not cut off
+  euclid_rep_type=1,
 
   euclid_notes={0,4,7,10},
   euclid_note_set=set({0,4,7,10})
@@ -156,27 +176,32 @@ function seq_new(length)
   -- place pulses and shift
   if self.euclid_pulses > 0 then
    for x=0,self.loop-1,self.loop/self.euclid_pulses do
-    local idx=((x+.5)\1+self.euclid_shift)
+    local idx=(flr(x)+self.euclid_shift)
     new_gate[idx%self.loop]=true
    end
   end
 
-  -- invert pulses
+  -- invert pulses and build list
+  local gate_list={}
   for i=0,self.loop-1 do
    if (self.euclid_inv>0) new_gate[i]=not new_gate[i]
+   if (new_gate[i]) add(gate_list,i)
   end
 
   -- assign arp notes and add repeats
   local arp=arps[self.euclid_arp](self.euclid_notes)
-  local last_gate,arp_note
-  for i=0,self.loop-1 do
-   if new_gate[i] then
-    last_gate=i
-    arp_note=arp()
-    for j=i,min(self.loop-1,i+self.euclid_note_reps*self.euclid_rep_del),self.euclid_rep_del do
-     self.gate[j]=true
-     self.note[j]=arp_note
-    end
+  local arp_note
+  local rep_change=(self.euclid_rep_type-1)\2>0
+  local rep_overlap=(self.euclid_rep_type-1)%2>0
+  for idx=1,#gate_list do
+   local i=gate_list[idx]
+   local i_next=gate_list[idx+1]
+   local limit=min(self.loop-1,i+self.euclid_note_reps*self.euclid_rep_del)
+   if (i_next and not rep_overlap) limit=min(limit,gate_list[idx+1])
+   for j=i,limit,self.euclid_rep_del do
+    if (j==i or rep_change) arp_note=arp()
+    self.gate[j]=true
+    self.note[j]=arp_note
    end
   end
  end

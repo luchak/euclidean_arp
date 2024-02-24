@@ -30,16 +30,23 @@ function note_grid_new()
  local note_grid=grid_new(
   function(col,row)
     col+=grid_page*16
+    local note_row=row+grid_trans-36
     if (seq.playing and seq.step==col) return 14
-    if (seq.gate[col] and (seq.note[col]==row)) return 8
+    if seq.gate[col] then
+     local note=seq.note[col]
+     if (note==note_row) return 8
+     if (row==0 and note<grid_trans-36) return 5
+     if (row==7 and note>=grid_trans-28) return 5
+    end
     return 4
   end,
   function(col,row,is_long)
    col+=grid_page*16
-   if seq.gate[col] and seq.note[col]==row then
+   local note_row=row+grid_trans-36
+   if seq.gate[col] and seq.note[col]==note_row then
     seq.gate[col]=false
    else
-    seq.note[col]=row
+    seq.note[col]=note_row
     seq.gate[col]=true
    end
   end
@@ -60,7 +67,8 @@ function euclid_mask_grid_new()
   function(col,row)
     if (col>=12) return 4
     local c=BLACK_KEYS[col] and 0 or 1
-    if (row==3) c+=5
+    local idx=row*12+col
+    if (idx>=grid_trans and idx<grid_trans+8) c+=5
     if (seq.euclid_note_set[grid_to_mask(col,row)]) c=13
     return c
   end,

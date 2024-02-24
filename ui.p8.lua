@@ -1,3 +1,5 @@
+NOTE_NAMES={'c','c#','d','d#','e','f','f#','g','g#','a','a#','b'}
+
 function ui_init()
  widgets={}
 
@@ -12,6 +14,7 @@ function ui_init()
 
  -- assorted state that should go elsewhere probably
  grid_page=0
+ grid_trans=36
 
  -- enable mouse
  poke(0x5f2d,1)
@@ -161,11 +164,12 @@ function text_momentary_new(x,y,col_off,text_off,col_on,text_on,is_on,click)
  )
 end
 
-function num_spinner_new(x,y,col,digits,min_val,max_val,sens,step,get,set)
+function num_spinner_new(x,y,col,digits,min_val,max_val,sens,step,get,set,fmt)
  local drag_val
+ fmt=fmt or tostr
  return widget_new(x,y,digits*4,8,
   function()
-   local s=tostr(get())
+   local s=fmt(get())
    print(s,x+4*max(digits-#s),y+1,col)
    --print(get())
   end,

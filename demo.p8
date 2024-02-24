@@ -42,14 +42,14 @@ function _init()
 
  ui_add(label_new(16,0,6,'bpm'))
  ui_add(num_spinner_new(
-  32,0,15,3,60,200,0.2,1,
+  32,0,15,3,60,200,0.1,1,
   function() return seq.bpm end,
   function(x) seq:set_tempo(x) end
  ))
 
  ui_add(label_new(48,0,6,'loop'))
  ui_add(num_spinner_new(
-  68,0,15,2,1,64,0.1,1,
+  68,0,15,2,1,64,0.05,1,
   function() return seq.loop end,
   function(x) seq:set_loop(x) end
  ))
@@ -60,22 +60,22 @@ function _init()
  ui_add(label_new(44,16,6,'rot'))
  ui_add(label_new(64,16,6,'inv'))
  ui_add(num_spinner_new(
-  0,24,15,4,1,64,0.1,1,
+  0,24,15,4,1,64,0.05,1,
   function() return seq.euclid_len end,
   function(x) seq.euclid_len=x seq.euclid_pulses=min(x,seq.euclid_pulses) seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
-  20,24,15,4,0,64,0.1,1,
+  20,24,15,4,0,64,0.05,1,
   function() return seq.euclid_pulses end,
   function(x) seq.euclid_pulses=min(x,seq.euclid_len) seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
-  40,24,15,4,-15,15,0.1,1,
+  40,24,15,4,-15,15,0.05,1,
   function() return seq.euclid_shift end,
   function(x) seq.euclid_shift=x seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
-  60,24,15,4,0,1,0.1,1,
+  60,24,15,4,0,1,0.05,1,
   function() return seq.euclid_inv end,
   function(x) seq.euclid_inv=x seq:euclid_gen() end
  ))
@@ -84,20 +84,28 @@ function _init()
  ui_add(label_new(4,40,6,'arp'))
  ui_add(label_new(20,40,6,'reps'))
  ui_add(label_new(40,40,6,'rdel'))
+ ui_add(label_new(60,40,6,'rtyp'))
  ui_add(num_spinner_new(
-  0,48,15,4,1,#arps,0.1,1,
+  0,48,15,4,1,#arps,0.05,1,
   function() return seq.euclid_arp end,
-  function(x) seq.euclid_arp=x seq:euclid_gen() end
+  function(x) seq.euclid_arp=x seq:euclid_gen() end,
+  function(x) return arp_names[x] end
  ))
  ui_add(num_spinner_new(
-  20,48,15,4,0,8,0.1,1,
+  20,48,15,4,0,8,0.05,1,
   function() return seq.euclid_note_reps end,
   function(x) seq.euclid_note_reps=x seq:euclid_gen() end
  ))
  ui_add(num_spinner_new(
-  40,48,15,4,1,8,0.1,1,
+  40,48,15,4,1,8,0.05,1,
   function() return seq.euclid_rep_del end,
   function(x) seq.euclid_rep_del=x seq:euclid_gen() end
+ ))
+ ui_add(num_spinner_new(
+  60,48,15,4,1,4,0.05,1,
+  function() return seq.euclid_rep_type end,
+  function(x) seq.euclid_rep_type=x seq:euclid_gen() end,
+  function(x) return rep_type_names[x] end
  ))
 
  ui_add(text_momentary_new(
@@ -111,6 +119,19 @@ function _init()
   function() set_show_euclid_mask(true) end
  ))
 
+ ui_add(label_new(44,56,6,'base'))
+ ui_add(num_spinner_new(
+  64,56,15,3,0,87,0.05,1,
+  function() return grid_trans end,
+  function(x) grid_trans=x end,
+  function(x)
+   local note=x%12
+   local oct=x\12
+   local res=NOTE_NAMES[note+1]
+   if (#res<2) res..='-'
+   return res..oct
+  end
+ ))
 
  ui_add(label_new(80,56,6,'page'))
  ui_add(text_momentary_new(
